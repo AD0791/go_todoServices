@@ -11,10 +11,14 @@ import (
 type Config struct {
 	APP struct {
 		Address           string `yaml:"address"`
-		PREFIX            string `ymal:"prefix"`
-		NAME              string `ymal:"name"`
-		ENABLEPRINTROUTES bool   `ymal:"enablePrintRoutes"`
-		SERVERHEADER      string `ymal:"SeverHeader"`
+		PREFIX            string `yaml:"prefix"`
+		NAME              string `yaml:"name"`
+		ENABLEPRINTROUTES bool   `yaml:"enablePrintRoutes"`
+		SERVERHEADER      string `yaml:"SeverHeader"`
+		AllowOrigins      string `yaml:"allowOrigins"`
+		AllowMethods      string `yaml:"allowMethods"`
+		AllowHeaders      string `yaml:"allowHeaders"`
+		AllowCredentials  bool   `yaml:"allowCredentials"`
 	} `yaml:"app"`
 	API struct {
 		JsonPlaceholder string `yaml:"jsonplaceholder"`
@@ -39,22 +43,24 @@ func LoadConfig() (*Config, error) {
 	projectRoot := getProjectRoot()
 	fp := filepath.Join(projectRoot, "config.yml")
 
-	file, err := os.ReadFile(fp)
+	file, err := os.Open(fp)
 	if err != nil {
 		return nil, err
 	}
-	//defer file.Close()
+	defer file.Close()
 
 	cfg := &Config{}
 
-	/* decoder := yaml.NewDecoder(file)
+	decoder := yaml.NewDecoder(file)
 	if err := decoder.Decode(cfg); err != nil {
+		log.Errorf("Didnt decode it right: %v", err)
+		log.Infof("the decoded err: %v", cfg)
 		return nil, err
-	} */
-
-	if err := yaml.Unmarshal(file, cfg); err != nil {
-		log.Fatalf("Unmarshal: %v", err)
 	}
+
+	/* if err := yaml.Unmarshal(file, cfg); err != nil {
+		log.Fatalf("Unmarshal: %v", err)
+	} */
 
 	log.Infof("Config yml has been decoded: %v", cfg)
 

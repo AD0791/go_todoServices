@@ -4,5 +4,9 @@ app:
   name: "Yet Another Over Engineer Todo"
   enablePrintRoutes: true
   serverHeader: "Todo Engineer"
+  allowOrigins:     "*"
+  allowMethods:   "GET,POST,PUT,DELETE,OPTIONS"
+  allowHeaders:    "Content-Type, Authorization"
+  allowCredentials: false
 api:
   jsonplaceholder: "https://jsonplaceholder.typicode.com/todos"

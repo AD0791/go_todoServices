@@ -4,12 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/ad0791/todoServices/api/v1/schema"
 	"github.com/ad0791/todoServices/config"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
-	"golang.org/x/tools/go/analysis/passes/defers"
+)
+
+var (
+	lastID  = 200
+	idMutex sync.Mutex
 )
 
 func getCOnfig() (*config.Config, error) {
@@ -21,7 +26,7 @@ func getCOnfig() (*config.Config, error) {
 	return cfg, nil
 }
 
-func FetchTodos() ([]schema.TodoResponse, error) {
+func FetchTodos() ([]*schema.TodoResponse, error) {
 	cfg, err := getCOnfig()
 	if err != nil {
 		return nil, err
@@ -34,7 +39,7 @@ func FetchTodos() ([]schema.TodoResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	var todos []schema.TodoResponse
+	var todos []*schema.TodoResponse
 	if err := json.NewDecoder(resp.Body).Decode(&todos); err != nil {
 		log.Errorf("fetch error for todos decoding: %v", err)
 		return nil, err
@@ -42,7 +47,7 @@ func FetchTodos() ([]schema.TodoResponse, error) {
 	return todos, nil
 }
 
-func FetchTodoByID(id string) (schema.TodoResponse, error) {
+func FetchTodoByID(id string) (*schema.TodoResponse, error) {
 	cfg, err := getCOnfig()
 	if err != nil {
 		return nil, err
@@ -53,27 +58,102 @@ func FetchTodoByID(id string) (schema.TodoResponse, error) {
 	resp, err := http.Get(fetchQueryString)
 	if err != nil {
 		log.Errorf("There is an issue with fetching client: %v", err)
-		return schema.TodoResponse{}, err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == fiber.StatusNotFound {
-		log.Info("Todo "+ string(id)+ " does not exist")
-		return  schema.TodoResponse{}, errors.New("todo not found")}
+		log.Infof("Todo %s does not exist", string(id))
+		return nil, fmt.Errorf("todo not found")
 	}
 
-	var todo schema.TodoResponse
-	if err:= json.NewDecoder(resp.Body).Decode(&todo); err != nil{
+	var todo *schema.TodoResponse
+	if err := json.NewDecoder(resp.Body).Decode(&todo); err != nil {
 		log.Errorf("There is an issue with fetching the todo: %v", err)
-		return schema.TodoResponse{}, err
+		return nil, err
 	}
 
 	return todo, nil
 
 }
 
-func CreateTodo(req schema.TodoRequest) {}
+func CreateTodo(req *schema.TodoRequest) (*schema.TodoResponse, error) {
+	//TODO operation are in memory / improve with a jsonplaceholder store
+	idMutex.Lock()
+	lastID++
+	newID := lastID
+	idMutex.Unlock()
 
-func UpdateTodoByID() {}
+	return &schema.TodoResponse{
+		ID:        newID,
+		Title:     req.Title,
+		Completed: req.Completed,
+	}, nil
+}
 
-func DeleteTodoByID() {}
+func UpdateTodoByID(id string, req *schema.TodoRequest) (*schema.TodoResponse, error) {
+	//TODO operation are in memory / improve with a jsonplaceholder store
+	cfg, err := getCOnfig()
+	if err != nil {
+		return nil, err
+	}
+
+	fetchQueryString := fmt.Sprintf("%s/%s", cfg.API.JsonPlaceholder, id)
+
+	resp, err := http.Get(fetchQueryString)
+	if err != nil {
+		log.Errorf("There is an issue with fetching client: %v", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == fiber.StatusNotFound {
+		log.Infof("Todo %s does not exist", string(id))
+		return nil, fmt.Errorf("todo not found")
+	}
+
+	var todo *schema.TodoResponse
+	if err := json.NewDecoder(resp.Body).Decode(&todo); err != nil {
+		log.Errorf("There is an issue with fetching the todo: %v", err)
+		return nil, err
+	}
+
+	todo.Title = req.Title
+	todo.Completed = req.Completed
+
+	return todo, nil
+
+}
+
+func DeleteTodoByID(id string) (*schema.MessageResponse, error) {
+	//TODO operation are in memory / improve with a jsonplaceholder store
+	cfg, err := getCOnfig()
+	if err != nil {
+		return nil, err
+	}
+
+	fetchQueryString := fmt.Sprintf("%s/%s", cfg.API.JsonPlaceholder, id)
+
+	resp, err := http.Get(fetchQueryString)
+	if err != nil {
+		log.Errorf("There is an issue with fetching client: %v", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == fiber.StatusNotFound {
+		log.Infof("Todo %s does not exist", string(id))
+		return nil, fmt.Errorf("todo not found")
+	}
+
+	var todo *schema.TodoResponse
+	if err := json.NewDecoder(resp.Body).Decode(&todo); err != nil {
+		log.Errorf("There is an issue with fetching the todo: %v", err)
+		return nil, err
+	}
+
+	return &schema.MessageResponse{
+		ID:      todo.ID,
+		Message: "Todo has been deleted",
+	}, nil
+}

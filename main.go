@@ -5,6 +5,7 @@ import (
 	"github.com/ad0791/todoServices/config"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func main() {
@@ -13,7 +14,7 @@ func main() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	cfg.APP.ENABLEPRINTROUTES = true
+	//cfg.APP.ENABLEPRINTROUTES = true
 	appConfig := fiber.Config{
 		AppName:           cfg.APP.NAME,
 		ServerHeader:      cfg.APP.SERVERHEADER,
@@ -21,6 +22,14 @@ func main() {
 	}
 
 	app := fiber.New(appConfig)
+
+	//cfg.APP.AllowCredentials = true
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     cfg.APP.AllowOrigins,
+		AllowMethods:     cfg.APP.AllowMethods,
+		AllowHeaders:     cfg.APP.AllowHeaders,
+		AllowCredentials: cfg.APP.AllowCredentials,
+	}))
 
 	v1.RegisterRoutes(app)
 
