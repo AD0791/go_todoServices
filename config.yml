@@ -1,5 +1,8 @@
 app:
-  address: ":3000"
+  address: ":8080"
   prefix: "api/v1"
+  name: "Yet Another Over Engineer Todo"
+  enablePrintRoutes: true
+  serverHeader: "Todo Engineer"
 api:
   jsonplaceholder: "https://jsonplaceholder.typicode.com/todos"

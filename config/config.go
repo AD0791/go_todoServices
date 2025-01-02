@@ -10,8 +10,11 @@ import (
 
 type Config struct {
 	APP struct {
-		Address string `yaml:"address"`
-		PREFIX  string `ymal:"prefix"`
+		Address           string `yaml:"address"`
+		PREFIX            string `ymal:"prefix"`
+		NAME              string `ymal:"name"`
+		ENABLEPRINTROUTES bool   `ymal:"enablePrintRoutes"`
+		SERVERHEADER      string `ymal:"SeverHeader"`
 	} `yaml:"app"`
 	API struct {
 		JsonPlaceholder string `yaml:"jsonplaceholder"`
@@ -36,19 +39,21 @@ func LoadConfig() (*Config, error) {
 	projectRoot := getProjectRoot()
 	fp := filepath.Join(projectRoot, "config.yml")
 
-	file, err := os.Open(fp)
+	file, err := os.ReadFile(fp)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	//defer file.Close()
 
 	cfg := &Config{}
 
-	log.Infof("Empty config: %v", cfg)
-
-	decoder := yaml.NewDecoder(file)
+	/* decoder := yaml.NewDecoder(file)
 	if err := decoder.Decode(cfg); err != nil {
 		return nil, err
+	} */
+
+	if err := yaml.Unmarshal(file, cfg); err != nil {
+		log.Fatalf("Unmarshal: %v", err)
 	}
 
 	log.Infof("Config yml has been decoded: %v", cfg)

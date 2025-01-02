@@ -72,7 +72,7 @@ func FetchTodoByID(id string) (schema.TodoResponse, error) {
 
 }
 
-func CreateTodo() {}
+func CreateTodo(req schema.TodoRequest) {}
 
 func UpdateTodoByID() {}
 
