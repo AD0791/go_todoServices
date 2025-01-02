@@ -1,0 +1,26 @@
+# Binaries
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+
+# Dependency directories
+vendor/
+
+# Environment and config
+.env
+.env.*
+
+# OS or IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+*.out
