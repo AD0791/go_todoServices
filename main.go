@@ -3,11 +3,21 @@ package main
 import (
 	v1 "github.com/ad0791/todoServices/api/v1"
 	"github.com/ad0791/todoServices/config"
+	_ "github.com/ad0791/todoServices/docs"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/swagger"
 )
 
+// @title Todo API Documentation
+// @version 1.1
+// @description API documentation for Todo service with persistence
+// @termsOfService Developpement
+// @contact.name AD0791
+// @contact.email alexandrodisla@hotmail.com
+// @host localhost:8080
+// @BasePath /api/v1
 func main() {
 	cfg, err := config.LoadConfig()
 	if err != nil {
@@ -30,6 +40,8 @@ func main() {
 		AllowHeaders:     cfg.APP.AllowHeaders,
 		AllowCredentials: cfg.APP.AllowCredentials,
 	}))
+
+	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	v1.RegisterRoutes(app)
 
