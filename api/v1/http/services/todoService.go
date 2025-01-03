@@ -78,7 +78,6 @@ func FetchTodoByID(id string) (*schema.TodoResponse, error) {
 }
 
 func CreateTodo(req *schema.TodoRequest) (*schema.TodoResponse, error) {
-	//TODO operation are in memory / improve with a jsonplaceholder store
 	idMutex.Lock()
 	lastID++
 	newID := lastID
@@ -92,7 +91,6 @@ func CreateTodo(req *schema.TodoRequest) (*schema.TodoResponse, error) {
 }
 
 func UpdateTodoByID(id string, req *schema.TodoRequest) (*schema.TodoResponse, error) {
-	//TODO operation are in memory / improve with a jsonplaceholder store
 	cfg, err := getCOnfig()
 	if err != nil {
 		return nil, err
@@ -126,7 +124,6 @@ func UpdateTodoByID(id string, req *schema.TodoRequest) (*schema.TodoResponse, e
 }
 
 func DeleteTodoByID(id string) (*schema.MessageResponse, error) {
-	//TODO operation are in memory / improve with a jsonplaceholder store
 	cfg, err := getCOnfig()
 	if err != nil {
 		return nil, err

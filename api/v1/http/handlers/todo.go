@@ -11,13 +11,20 @@ import (
 var validate = validator.New()
 
 func RegisterTodoRoutes(router fiber.Router) {
-	router.Get("/todos", GetTodos)
-	router.Get("/todos/:id", GetTodoByID)
-	router.Post("/todos", CreateTodo)
-	router.Put("/todos/:id", UpdateTodo)
-	router.Delete("/todos/:id", DeleteTodo)
+	router.Get("service/todos", GetTodos)
+	router.Get("service/todos/:id", GetTodoByID)
+	router.Post("service/todos", CreateTodo)
+	router.Put("service/todos/:id", UpdateTodo)
+	router.Delete("service/todos/:id", DeleteTodo)
 }
 
+// @Summary Get all todos
+// @Description Retrieve all todos
+// @Tags todos_services_noPersistence
+// @Accept json
+// @Produce json
+// @Success 200 {array} schema.TodoResponse
+// @Router /service/todos [get]
 func GetTodos(c *fiber.Ctx) error {
 	todos, err := services.FetchTodos()
 	if err != nil {
@@ -27,6 +34,15 @@ func GetTodos(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(todos)
 }
 
+// @Summary Get todo by ID
+// @Description Retrieve a single todo by its ID
+// @Tags todos_services_noPersistence
+// @Param id path int true "Todo ID"
+// @Accept json
+// @Produce json
+// @Success 200 {object} schema.TodoResponse
+// @Failure 404 {string} string "Todo not found"
+// @Router /service/todos/{id} [get]
 func GetTodoByID(c *fiber.Ctx) error {
 	id := c.Params("id")
 	todo, err := services.FetchTodoByID(id)
@@ -38,6 +54,15 @@ func GetTodoByID(c *fiber.Ctx) error {
 
 }
 
+// @Summary Create a new todo
+// @Description Add a new todo to the list
+// @Tags todos_services_noPersistence
+// @Accept json
+// @Produce json
+// @Param todo body schema.TodoRequest true "Todo to create"
+// @Success 201 {object} schema.TodoResponse
+// @Failure 400 {string} string "Validation error"
+// @Router /service/todos [post]
 func CreateTodo(c *fiber.Ctx) error {
 	var req schema.TodoRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -59,6 +84,17 @@ func CreateTodo(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(todo)
 }
 
+// @Summary Update a todo
+// @Description Modify an existing todo
+// @Tags todos_services_noPersistence
+// @Accept json
+// @Produce json
+// @Param id path int true "Todo ID"
+// @Param todo body schema.TodoRequest true "Updated todo data"
+// @Success 200 {object} schema.TodoResponse
+// @Failure 404 {string} string "Todo not found"
+// @Failure 400 {string} string "Validation error"
+// @Router /service/todos/{id} [put]
 func UpdateTodo(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var req schema.TodoRequest
@@ -81,6 +117,13 @@ func UpdateTodo(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(updatedTodo)
 }
 
+// @Summary Delete a todo
+// @Description Remove a todo from the list
+// @Tags todos_services_noPersistence
+// @Param id path int true "Todo ID"
+// @Success 202 {object} schema.MessageResponse
+// @Failure 404 {string} string "Todo not found"
+// @Router /service/todos/{id} [delete]
 func DeleteTodo(c *fiber.Ctx) error {
 	id := c.Params("id")
 	message, err := services.DeleteTodoByID(id)
