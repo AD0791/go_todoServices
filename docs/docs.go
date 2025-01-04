@@ -19,6 +19,195 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/file/todos": {
+            "get": {
+                "description": "Retrieve all todos",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "Get all todos",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/filemodel.Todo"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add a new todo to the list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "Create a new todo",
+                "parameters": [
+                    {
+                        "description": "Todo to create",
+                        "name": "todo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.TodoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/filemodel.Todo"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/file/todos/{id}": {
+            "get": {
+                "description": "Retrieve a single todo by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "Get todo by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Todo ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/filemodel.Todo"
+                        }
+                    },
+                    "404": {
+                        "description": "Todo not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Modify an existing todo",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "Update a todo",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Todo ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated todo data",
+                        "name": "todo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.TodoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schema.TodoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Todo not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove a todo from the json list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "Delete a todo",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Todo ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/schema.MessageResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Todo not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/service/todos": {
             "get": {
                 "description": "Retrieve all todos",
@@ -29,7 +218,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "todos_services_noPersistence"
+                    "service"
                 ],
                 "summary": "Get all todos",
                 "responses": {
@@ -53,7 +242,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "todos_services_noPersistence"
+                    "service"
                 ],
                 "summary": "Create a new todo",
                 "parameters": [
@@ -93,7 +282,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "todos_services_noPersistence"
+                    "service"
                 ],
                 "summary": "Get todo by ID",
                 "parameters": [
@@ -129,7 +318,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "todos_services_noPersistence"
+                    "service"
                 ],
                 "summary": "Update a todo",
                 "parameters": [
@@ -173,8 +362,14 @@ const docTemplate = `{
             },
             "delete": {
                 "description": "Remove a todo from the list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
-                    "todos_services_noPersistence"
+                    "service"
                 ],
                 "summary": "Delete a todo",
                 "parameters": [
@@ -204,6 +399,24 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "filemodel.Todo": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "completed": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string",
+                    "minLength": 3
+                }
+            }
+        },
         "schema.MessageResponse": {
             "type": "object",
             "properties": {
@@ -232,6 +445,9 @@ const docTemplate = `{
         },
         "schema.TodoResponse": {
             "type": "object",
+            "required": [
+                "title"
+            ],
             "properties": {
                 "completed": {
                     "type": "boolean"
@@ -240,11 +456,22 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 3
                 }
             }
         }
-    }
+    },
+    "tags": [
+        {
+            "description": "File-based todo operations",
+            "name": "file"
+        },
+        {
+            "description": "Service-based todo operations",
+            "name": "service"
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
@@ -252,7 +479,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "1.1",
 	Host:             "localhost:8080",
 	BasePath:         "/api/v1",
-	Schemes:          []string{},
+	Schemes:          []string{"http"},
 	Title:            "Todo API Documentation",
 	Description:      "API documentation for Todo service with persistence",
 	InfoInstanceName: "swagger",

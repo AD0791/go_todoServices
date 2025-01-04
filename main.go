@@ -10,14 +10,19 @@ import (
 	"github.com/gofiber/swagger"
 )
 
-// @title Todo API Documentation
-// @version 1.1
-// @description API documentation for Todo service with persistence
-// @termsOfService Developpement
-// @contact.name AD0791
-// @contact.email alexandrodisla@hotmail.com
-// @host localhost:8080
-// @BasePath /api/v1
+// @title			Todo API Documentation
+// @version		1.1
+// @description	API documentation for Todo service with persistence
+// @termsOfService	Developpement
+// @contact.name	AD0791
+// @contact.email	alexandrodisla@hotmail.com
+// @host			localhost:8080
+// @BasePath		/api/v1
+// @schemes	       http
+// @tag.name       file
+// @tag.description File-based todo operations
+// @tag.name       service
+// @tag.description Service-based todo operations
 func main() {
 	cfg, err := config.LoadConfig()
 	if err != nil {

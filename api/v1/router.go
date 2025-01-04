@@ -1,7 +1,8 @@
 package v1
 
 import (
-	"github.com/ad0791/todoServices/api/v1/http/handlers"
+	filehandlers "github.com/ad0791/todoServices/api/v1/http/handlers/file"
+	servicehandlers "github.com/ad0791/todoServices/api/v1/http/handlers/service"
 	"github.com/ad0791/todoServices/config"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
@@ -14,5 +15,7 @@ func RegisterRoutes(app *fiber.App) {
 	}
 
 	api := app.Group(cfg.APP.PREFIX)
-	handlers.RegisterTodoRoutes(api)
+
+	filehandlers.RegisterFileTodoRoutes(api)
+	servicehandlers.RegisterServiceTodoRoutes(api)
 }

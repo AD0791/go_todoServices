@@ -1,5 +1,17 @@
 basePath: /api/v1
 definitions:
+  filemodel.Todo:
+    properties:
+      completed:
+        type: boolean
+      id:
+        type: integer
+      title:
+        minLength: 3
+        type: string
+    required:
+    - title
+    type: object
   schema.MessageResponse:
     properties:
       id:
@@ -24,7 +36,10 @@ definitions:
       id:
         type: integer
       title:
+        minLength: 3
         type: string
+    required:
+    - title
     type: object
 host: localhost:8080
 info:
@@ -36,7 +51,7 @@ info:
   title: Todo API Documentation
   version: "1.1"
 paths:
-  /service/todos:
+  /file/todos:
     get:
       consumes:
       - application/json
@@ -48,11 +63,11 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/schema.TodoResponse'
+              $ref: '#/definitions/filemodel.Todo'
             type: array
       summary: Get all todos
       tags:
-      - todos_services_noPersistence
+      - file
     post:
       consumes:
       - application/json
@@ -70,23 +85,27 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/schema.TodoResponse'
+            $ref: '#/definitions/filemodel.Todo'
         "400":
           description: Validation error
           schema:
             type: string
       summary: Create a new todo
       tags:
-      - todos_services_noPersistence
-  /service/todos/{id}:
+      - file
+  /file/todos/{id}:
     delete:
-      description: Remove a todo from the list
+      consumes:
+      - application/json
+      description: Remove a todo from the json list
       parameters:
       - description: Todo ID
         in: path
         name: id
         required: true
         type: integer
+      produces:
+      - application/json
       responses:
         "202":
           description: Accepted
@@ -98,7 +117,7 @@ paths:
             type: string
       summary: Delete a todo
       tags:
-      - todos_services_noPersistence
+      - file
     get:
       consumes:
       - application/json
@@ -115,14 +134,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/schema.TodoResponse'
+            $ref: '#/definitions/filemodel.Todo'
         "404":
           description: Todo not found
           schema:
             type: string
       summary: Get todo by ID
       tags:
-      - todos_services_noPersistence
+      - file
     put:
       consumes:
       - application/json
@@ -156,5 +175,137 @@ paths:
             type: string
       summary: Update a todo
       tags:
-      - todos_services_noPersistence
+      - file
+  /service/todos:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all todos
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/schema.TodoResponse'
+            type: array
+      summary: Get all todos
+      tags:
+      - service
+    post:
+      consumes:
+      - application/json
+      description: Add a new todo to the list
+      parameters:
+      - description: Todo to create
+        in: body
+        name: todo
+        required: true
+        schema:
+          $ref: '#/definitions/schema.TodoRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/schema.TodoResponse'
+        "400":
+          description: Validation error
+          schema:
+            type: string
+      summary: Create a new todo
+      tags:
+      - service
+  /service/todos/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a todo from the list
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/schema.MessageResponse'
+        "404":
+          description: Todo not found
+          schema:
+            type: string
+      summary: Delete a todo
+      tags:
+      - service
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single todo by its ID
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schema.TodoResponse'
+        "404":
+          description: Todo not found
+          schema:
+            type: string
+      summary: Get todo by ID
+      tags:
+      - service
+    put:
+      consumes:
+      - application/json
+      description: Modify an existing todo
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated todo data
+        in: body
+        name: todo
+        required: true
+        schema:
+          $ref: '#/definitions/schema.TodoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schema.TodoResponse'
+        "400":
+          description: Validation error
+          schema:
+            type: string
+        "404":
+          description: Todo not found
+          schema:
+            type: string
+      summary: Update a todo
+      tags:
+      - service
+schemes:
+- http
 swagger: "2.0"
+tags:
+- description: File-based todo operations
+  name: file
+- description: Service-based todo operations
+  name: service
