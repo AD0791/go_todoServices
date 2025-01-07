@@ -4,9 +4,13 @@ app:
   name: "Yet Another Over Engineer Todo"
   enablePrintRoutes: true
   serverHeader: "Todo Engineer"
-  allowOrigins:     "*"
-  allowMethods:   "GET,POST,PUT,DELETE,OPTIONS"
-  allowHeaders:    "Content-Type, Authorization"
+  allowOrigins: "*"
+  allowMethods: "GET,POST,PUT,DELETE,OPTIONS"
+  allowHeaders: "Content-Type, Authorization"
   allowCredentials: false
+database:
+  user: "postgres"
+  password: "postgres"
+  dbname: "tododb"
 api:
   jsonplaceholder: "https://jsonplaceholder.typicode.com/todos"

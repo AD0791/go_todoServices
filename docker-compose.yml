@@ -9,21 +9,21 @@ services:
     ports:
       - "8080:8080"
     environment:
-      APP_ADDRESS: "${APP_ADDRESS:-:8080}"
-      PREFIX: "${PREFIX:-api/v1}"
-      NAME: "${NAME:-Yet Another Over Engineer Todo}"
-      ENABLEPRINTROUTES: "${ENABLEPRINTROUTES:-true}"
-      SERVERHEADER: "${SERVERHEADER:-Todo Engineer}"
-      ALLOWORIGINS: "${ALLOWORIGINS:-*}"
-      ALLOWMETHODS: "${ALLOWMETHODS:-GET,POST,PUT,DELETE,OPTIONS}"
-      ALLOWHEADERS: "${ALLOWHEADERS:-Content-Type, Authorization}"
-      ALLOWCREDENTIALS: "${ALLOWCREDENTIALS:-false}"
-      JSONPLACEHOLDER: "${JSONPLACEHOLDER:-https://jsonplaceholder.typicode.com/todos}"
+      APP_ADDRESS: ":8080"
+      PREFIX: "api/v1"
+      NAME: "Yet Another Over Engineer Todo"
+      ENABLEPRINTROUTES: true
+      SERVERHEADER: "Todo Engineer"
+      ALLOWORIGINS: "*"
+      ALLOWMETHODS: "GET,POST,PUT,DELETE,OPTIONS"
+      ALLOWHEADERS: "Content-Type, Authorization"
+      ALLOWCREDENTIALS: false
+      JSONPLACEHOLDER: "https://jsonplaceholder.typicode.com/todos"
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     restart: unless-stopped
-    networks:
-      - todo-network
+
     
 
   database:
@@ -32,16 +32,17 @@ services:
     ports:
       - "5432:5432"
     environment:
-      DB_HOST: "${DB_HOST:-database}"
-      DB_PORT: "${DB_PORT:-5432}"
-      POSTGRES_USER: "${POSTGRES_USER:-postgres}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
-      POSTGRES_DB: "${POSTGRES_DB:-tododb}"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "tododb"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - db_data:/var/lib/postgresql/data
     restart: unless-stopped
-    networks:
-      - todo-network
 
   pgadmin:
     image: dpage/pgadmin4
@@ -49,17 +50,12 @@ services:
     ports:
       - "5050:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}"
-      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD:-secret}"
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "secret"
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     restart: unless-stopped
-    networks:
-      - todo-network
-
-networks:
-  todo-network:
-    driver: bridge
 
 volumes:
   db_data:

@@ -2,7 +2,7 @@ package schema
 
 type TodoRequest struct {
 	Title     string `json:"title" validate:"required,min=3"`
-	Completed bool   `json:"completed"`
+	Completed bool   `json:"completed" validate:"required"`
 }
 
 /* type FindTodo struct {
@@ -10,9 +10,9 @@ type TodoRequest struct {
 } */
 
 type TodoResponse struct {
-	ID        int    `json:"id"`
+	ID        int    `json:"id" validate:"required"`
 	Title     string `json:"title" validate:"required,min=3"`
-	Completed bool   `json:"completed"`
+	Completed bool   `json:"completed" validate:"required"`
 }
 
 type MessageResponse struct {

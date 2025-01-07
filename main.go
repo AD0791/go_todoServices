@@ -2,6 +2,7 @@ package main
 
 import (
 	v1 "github.com/ad0791/todoServices/api/v1"
+	"github.com/ad0791/todoServices/api/v1/database"
 	"github.com/ad0791/todoServices/config"
 	_ "github.com/ad0791/todoServices/docs"
 	"github.com/gofiber/fiber/v2"
@@ -27,6 +28,10 @@ func main() {
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
+	}
+
+	if err := database.InitDatabase(cfg); err != nil {
+		log.Fatalf("Failed to initialize the database: %v", err)
 	}
 
 	//cfg.APP.ENABLEPRINTROUTES = true

@@ -20,6 +20,11 @@ type Config struct {
 		AllowHeaders      string `yaml:"allowHeaders"`
 		AllowCredentials  bool   `yaml:"allowCredentials"`
 	} `yaml:"app"`
+	Database struct {
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+		DBName   string `yaml:"dbname"`
+	} `yaml:"database"`
 	API struct {
 		JsonPlaceholder string `yaml:"jsonplaceholder"`
 	} `ymal:"api"`
