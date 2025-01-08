@@ -19,14 +19,26 @@ definitions:
       message:
         type: string
     type: object
+  schema.MessageSQLResponse:
+    properties:
+      delete_at:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+    type: object
   schema.TodoRequest:
     properties:
       completed:
+        example: false
         type: boolean
       title:
+        example: Sample Todo
         minLength: 3
         type: string
     required:
+    - completed
     - title
     type: object
   schema.TodoResponse:
@@ -39,7 +51,27 @@ definitions:
         minLength: 3
         type: string
     required:
+    - completed
+    - id
     - title
+    type: object
+  schema.TodoSQLResponse:
+    properties:
+      completed:
+        example: false
+        type: boolean
+      created_at:
+        description: example:"2023-01-01T00:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      title:
+        example: Sample Todo
+        type: string
+      updated_at:
+        description: example:"2023-01-01T00:00:00Z"
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -301,6 +333,123 @@ paths:
       summary: Update a todo
       tags:
       - service
+  /sql/todos:
+    get:
+      consumes:
+      - application/json
+      description: Get all todos from database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/schema.TodoSQLResponse'
+            type: array
+      summary: Get all todos
+      tags:
+      - sql
+    post:
+      consumes:
+      - application/json
+      description: Create new todo
+      parameters:
+      - description: Todo request body
+        in: body
+        name: todo
+        required: true
+        schema:
+          $ref: '#/definitions/schema.TodoRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/schema.TodoSQLResponse'
+      summary: Create todo
+      tags:
+      - sql
+  /sql/todos/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Soft delete a todo by ID and return deletion details
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/schema.MessageSQLResponse'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Todo not found
+          schema:
+            type: string
+      summary: Delete todo
+      tags:
+      - sql
+    get:
+      consumes:
+      - application/json
+      description: Get single todo by ID
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schema.TodoSQLResponse'
+      summary: Get todo by ID
+      tags:
+      - sql
+    put:
+      consumes:
+      - application/json
+      description: Update todo by ID
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Todo object
+        in: body
+        name: todo
+        required: true
+        schema:
+          $ref: '#/definitions/schema.TodoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schema.TodoSQLResponse'
+        "404":
+          description: Todo not found
+          schema:
+            type: string
+      summary: Update todo
+      tags:
+      - sql
 schemes:
 - http
 swagger: "2.0"
@@ -309,3 +458,5 @@ tags:
   name: file
 - description: Service-based todo operations
   name: service
+- description: SQL-based todo operations
+  name: sql

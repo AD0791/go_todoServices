@@ -396,6 +396,183 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/sql/todos": {
+            "get": {
+                "description": "Get all todos from database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sql"
+                ],
+                "summary": "Get all todos",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/schema.TodoSQLResponse"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create new todo",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sql"
+                ],
+                "summary": "Create todo",
+                "parameters": [
+                    {
+                        "description": "Todo request body",
+                        "name": "todo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.TodoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/schema.TodoSQLResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/sql/todos/{id}": {
+            "get": {
+                "description": "Get single todo by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sql"
+                ],
+                "summary": "Get todo by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Todo ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schema.TodoSQLResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update todo by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sql"
+                ],
+                "summary": "Update todo",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Todo ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Todo object",
+                        "name": "todo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.TodoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schema.TodoSQLResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Todo not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Soft delete a todo by ID and return deletion details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sql"
+                ],
+                "summary": "Delete todo",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Todo ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/schema.MessageSQLResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Todo not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -428,24 +605,43 @@ const docTemplate = `{
                 }
             }
         },
+        "schema.MessageSQLResponse": {
+            "type": "object",
+            "properties": {
+                "delete_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "schema.TodoRequest": {
             "type": "object",
             "required": [
+                "completed",
                 "title"
             ],
             "properties": {
                 "completed": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": false
                 },
                 "title": {
                     "type": "string",
-                    "minLength": 3
+                    "minLength": 3,
+                    "example": "Sample Todo"
                 }
             }
         },
         "schema.TodoResponse": {
             "type": "object",
             "required": [
+                "completed",
+                "id",
                 "title"
             ],
             "properties": {
@@ -460,6 +656,31 @@ const docTemplate = `{
                     "minLength": 3
                 }
             }
+        },
+        "schema.TodoSQLResponse": {
+            "type": "object",
+            "properties": {
+                "completed": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "created_at": {
+                    "description": "example:\"2023-01-01T00:00:00Z\"",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Sample Todo"
+                },
+                "updated_at": {
+                    "description": "example:\"2023-01-01T00:00:00Z\"",
+                    "type": "string"
+                }
+            }
         }
     },
     "tags": [
@@ -470,6 +691,10 @@ const docTemplate = `{
         {
             "description": "Service-based todo operations",
             "name": "service"
+        },
+        {
+            "description": "SQL-based todo operations",
+            "name": "sql"
         }
     ]
 }`

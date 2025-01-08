@@ -4,6 +4,7 @@ import (
 	"github.com/ad0791/todoServices/api/v1/database"
 	sqlmodel "github.com/ad0791/todoServices/api/v1/models/sql_model"
 	"github.com/gofiber/fiber/v2/log"
+	"gorm.io/gorm"
 )
 
 func GetSQLTodos() ([]*sqlmodel.Todo, error) {
@@ -33,6 +34,27 @@ func UpdateSQLTodo(todo *sqlmodel.Todo) error {
 	return database.DB.Save(&todo).Error
 }
 
-func DeleteSQLTodo(id uint) error {
-	return database.DB.Delete(&sqlmodel.Todo{}, id).Error
+func DeleteAndGetSQLTodoByID(id uint) (*sqlmodel.Todo, error) {
+	var todo sqlmodel.Todo
+
+	// Soft delete the todo and ensure it exists
+	res := database.DB.Where("id = ?", id).Delete(&todo)
+	if res.Error != nil {
+		log.Errorf("Failed to soft-delete todo with ID %d: %v", id, res.Error)
+		return nil, res.Error
+	}
+
+	// Check if a record was deleted
+	if res.RowsAffected == 0 {
+		log.Warnf("No todo found to delete with ID %d", id)
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	// Retrieve the soft-deleted record
+	if err := database.DB.Unscoped().First(&todo, id).Error; err != nil {
+		log.Errorf("Failed to retrieve soft-deleted todo with ID %d: %v", id, err)
+		return nil, err
+	}
+
+	return &todo, nil
 }

@@ -26,7 +26,6 @@ import (
 // @tag.description Service-based todo operations
 // @tag.name       sql
 // @tag.description SQL-based todo operations
-
 func main() {
 	cfg, err := config.LoadConfig()
 	if err != nil {
