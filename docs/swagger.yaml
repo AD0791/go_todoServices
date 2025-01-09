@@ -21,7 +21,8 @@ definitions:
     type: object
   schema.MessageSQLResponse:
     properties:
-      delete_at:
+      deleted_at:
+        example: "2023-01-01"
         type: string
       id:
         type: integer
@@ -31,14 +32,15 @@ definitions:
   schema.TodoRequest:
     properties:
       completed:
+        description: example:"false"
         example: false
         type: boolean
       title:
+        description: example:"Sample Todo"
         example: Sample Todo
         minLength: 3
         type: string
     required:
-    - completed
     - title
     type: object
   schema.TodoResponse:
@@ -51,8 +53,6 @@ definitions:
         minLength: 3
         type: string
     required:
-    - completed
-    - id
     - title
     type: object
   schema.TodoSQLResponse:
@@ -61,7 +61,8 @@ definitions:
         example: false
         type: boolean
       created_at:
-        description: example:"2023-01-01T00:00:00Z"
+        description: Formatted date
+        example: "2023-01-01"
         type: string
       id:
         example: 1
@@ -70,7 +71,8 @@ definitions:
         example: Sample Todo
         type: string
       updated_at:
-        description: example:"2023-01-01T00:00:00Z"
+        description: Formatted date
+        example: "2023-01-01"
         type: string
     type: object
 host: localhost:8080
@@ -337,7 +339,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get all todos from database
+      description: Retrieve all todos from the database
       produces:
       - application/json
       responses:
@@ -347,13 +349,17 @@ paths:
             items:
               $ref: '#/definitions/schema.TodoSQLResponse'
             type: array
+        "500":
+          description: Database error
+          schema:
+            type: string
       summary: Get all todos
       tags:
       - sql
     post:
       consumes:
       - application/json
-      description: Create new todo
+      description: Create a new todo
       parameters:
       - description: Todo request body
         in: body
@@ -368,6 +374,14 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/schema.TodoSQLResponse'
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
       summary: Create todo
       tags:
       - sql
@@ -375,7 +389,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Soft delete a todo by ID and return deletion details
+      description: Soft delete a todo by ID
       parameters:
       - description: Todo ID
         in: path
@@ -397,13 +411,17 @@ paths:
           description: Todo not found
           schema:
             type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
       summary: Delete todo
       tags:
       - sql
     get:
       consumes:
       - application/json
-      description: Get single todo by ID
+      description: Retrieve a single todo by its ID
       parameters:
       - description: Todo ID
         in: path
@@ -417,20 +435,28 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/schema.TodoSQLResponse'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Todo not found
+          schema:
+            type: string
       summary: Get todo by ID
       tags:
       - sql
     put:
       consumes:
       - application/json
-      description: Update todo by ID
+      description: Update an existing todo
       parameters:
       - description: Todo ID
         in: path
         name: id
         required: true
         type: integer
-      - description: Todo object
+      - description: Updated todo data
         in: body
         name: todo
         required: true
@@ -443,8 +469,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/schema.TodoSQLResponse'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
         "404":
           description: Todo not found
+          schema:
+            type: string
+        "500":
+          description: Database error
           schema:
             type: string
       summary: Update todo

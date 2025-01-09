@@ -11,9 +11,11 @@ func GetSQLTodos() ([]*sqlmodel.Todo, error) {
 	var todos []*sqlmodel.Todo
 	res := database.DB.Find(&todos)
 	if res.Error != nil {
-		log.Errorf("Probably didn't find the todo %v: %v", todos, res.Error)
+		log.Errorf("Failed to fetch todos: %v", res.Error)
+		return nil, res.Error
 	}
-	return todos, res.Error
+	log.Infof("Fetched %d todos from DB", len(todos))
+	return todos, nil
 
 }
 
@@ -22,8 +24,9 @@ func GetSQLTodoByID(id uint) (*sqlmodel.Todo, error) {
 	res := database.DB.First(&todo, id)
 	if res.Error != nil {
 		log.Errorf("Probably didn't find the todo with the id %d: %v", id, res.Error)
+		return nil, res.Error
 	}
-	return todo, res.Error
+	return todo, nil
 }
 
 func CreateSQLTodo(todo *sqlmodel.Todo) error {
@@ -31,7 +34,12 @@ func CreateSQLTodo(todo *sqlmodel.Todo) error {
 }
 
 func UpdateSQLTodo(todo *sqlmodel.Todo) error {
-	return database.DB.Save(&todo).Error
+	if err := database.DB.Save(&todo).Error; err != nil {
+		log.Errorf("Failed to update todo with ID %d: %v", &todo.ID, err)
+		return err
+	}
+	log.Infof("Successfully updated todo with ID %d", &todo.ID)
+	return nil
 }
 
 func DeleteAndGetSQLTodoByID(id uint) (*sqlmodel.Todo, error) {

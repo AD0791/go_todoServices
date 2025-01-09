@@ -399,7 +399,7 @@ const docTemplate = `{
         },
         "/sql/todos": {
             "get": {
-                "description": "Get all todos from database",
+                "description": "Retrieve all todos from the database",
                 "consumes": [
                     "application/json"
                 ],
@@ -419,11 +419,17 @@ const docTemplate = `{
                                 "$ref": "#/definitions/schema.TodoSQLResponse"
                             }
                         }
+                    },
+                    "500": {
+                        "description": "Database error",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             },
             "post": {
-                "description": "Create new todo",
+                "description": "Create a new todo",
                 "consumes": [
                     "application/json"
                 ],
@@ -451,13 +457,25 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/schema.TodoSQLResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database error",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             }
         },
         "/sql/todos/{id}": {
             "get": {
-                "description": "Get single todo by ID",
+                "description": "Retrieve a single todo by its ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -483,11 +501,23 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/schema.TodoSQLResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Todo not found",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             },
             "put": {
-                "description": "Update todo by ID",
+                "description": "Update an existing todo",
                 "consumes": [
                     "application/json"
                 ],
@@ -507,7 +537,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Todo object",
+                        "description": "Updated todo data",
                         "name": "todo",
                         "in": "body",
                         "required": true,
@@ -523,8 +553,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/schema.TodoSQLResponse"
                         }
                     },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "404": {
                         "description": "Todo not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database error",
                         "schema": {
                             "type": "string"
                         }
@@ -532,7 +574,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Soft delete a todo by ID and return deletion details",
+                "description": "Soft delete a todo by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -567,6 +609,12 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Todo not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database error",
                         "schema": {
                             "type": "string"
                         }
@@ -608,8 +656,9 @@ const docTemplate = `{
         "schema.MessageSQLResponse": {
             "type": "object",
             "properties": {
-                "delete_at": {
-                    "type": "string"
+                "deleted_at": {
+                    "type": "string",
+                    "example": "2023-01-01"
                 },
                 "id": {
                     "type": "integer"
@@ -622,15 +671,16 @@ const docTemplate = `{
         "schema.TodoRequest": {
             "type": "object",
             "required": [
-                "completed",
                 "title"
             ],
             "properties": {
                 "completed": {
+                    "description": "example:\"false\"",
                     "type": "boolean",
                     "example": false
                 },
                 "title": {
+                    "description": "example:\"Sample Todo\"",
                     "type": "string",
                     "minLength": 3,
                     "example": "Sample Todo"
@@ -640,8 +690,6 @@ const docTemplate = `{
         "schema.TodoResponse": {
             "type": "object",
             "required": [
-                "completed",
-                "id",
                 "title"
             ],
             "properties": {
@@ -665,8 +713,9 @@ const docTemplate = `{
                     "example": false
                 },
                 "created_at": {
-                    "description": "example:\"2023-01-01T00:00:00Z\"",
-                    "type": "string"
+                    "description": "Formatted date",
+                    "type": "string",
+                    "example": "2023-01-01"
                 },
                 "id": {
                     "type": "integer",
@@ -677,8 +726,9 @@ const docTemplate = `{
                     "example": "Sample Todo"
                 },
                 "updated_at": {
-                    "description": "example:\"2023-01-01T00:00:00Z\"",
-                    "type": "string"
+                    "description": "Formatted date",
+                    "type": "string",
+                    "example": "2023-01-01"
                 }
             }
         }

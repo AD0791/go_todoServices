@@ -22,19 +22,18 @@ func RegisterSQLTodoRoutes(router fiber.Router) {
 }
 
 // @Summary     Get all todos
-// @Description Get all todos from database
+// @Description Retrieve all todos from the database
 // @Tags        sql
 // @Accept      json
 // @Produce     json
-// @Success     200 {array}  schema.TodoSQLResponse
+// @Success     200 {array} schema.TodoSQLResponse
+// @Failure     500 {string} string "Database error"
 // @Router      /sql/todos [get]
 func GetSQLTodos(c *fiber.Ctx) error {
 	todos, err := sqlrepository.GetSQLTodos()
 	if err != nil {
-		log.Errorf("We had an error to get all todos: %v", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Error fetching todos",
-		})
+		log.Errorf("Failed to fetch todos from DB: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Database error"})
 	}
 
 	var resp []*schema.TodoSQLResponse
@@ -48,29 +47,33 @@ func GetSQLTodos(c *fiber.Ctx) error {
 			UpdatedAt: todo.UpdatedAt.Format("1990-12-01"),
 		})
 	}
-
+	log.Infof("Successfully fetched %d todos", len(resp))
 	return c.Status(fiber.StatusOK).JSON(resp)
 }
 
 // @Summary     Get todo by ID
-// @Description Get single todo by ID
+// @Description Retrieve a single todo by its ID
 // @Tags        sql
 // @Accept      json
 // @Produce     json
 // @Param       id path int true "Todo ID"
 // @Success     200 {object} schema.TodoSQLResponse
+// @Failure     404 {string} string "Todo not found"
+// @Failure     400 {string} string "Invalid ID"
 // @Router      /sql/todos/{id} [get]
 func GetSQLTodoByID(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
+	//id, err := strconv.ParseUint(c.Params("id"), 10, 32)
+	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		log.Errorf("ID not valid to get todo: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Can't convert the id to uint",
+			"error": "Invalid ID format",
 		})
 	}
 
 	todo, err := sqlrepository.GetSQLTodoByID(uint(id))
 	if err != nil {
+		log.Errorf("Todo with ID %d not found: %v", id, err)
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "Todo not found",
 		})
@@ -80,33 +83,35 @@ func GetSQLTodoByID(c *fiber.Ctx) error {
 		ID:        todo.ID,
 		Title:     todo.Title,
 		Completed: todo.Completed,
-		CreatedAt: todo.CreatedAt.Format("1990-12-01"),
-		UpdatedAt: todo.UpdatedAt.Format("1990-12-01"),
+		CreatedAt: todo.CreatedAt.Format("2006-01-02"),
+		UpdatedAt: todo.UpdatedAt.Format("2006-01-02"),
 	}
-
+	log.Infof("Successfully fetched todo with ID %d", id)
 	return c.Status(fiber.StatusOK).JSON(resp)
 }
 
 // @Summary     Create todo
-// @Description Create new todo
+// @Description Create a new todo
 // @Tags        sql
 // @Accept      json
 // @Produce     json
 // @Param       todo body schema.TodoRequest true "Todo request body"
 // @Success     201 {object} schema.TodoSQLResponse
+// @Failure     400 {string} string "Invalid input"
+// @Failure     500 {string} string "Database error"
 // @Router      /sql/todos [post]
 func CreateSQLTodo(c *fiber.Ctx) error {
-	var reqTodo schema.TodoRequest
+	var reqTodo *schema.TodoRequest
 
 	if err := c.BodyParser(&reqTodo); err != nil {
-		log.Errorf("We can create sql todo: %v", err)
+		log.Errorf("Failed to parse request body: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Cannot parse JSON",
 		})
 	}
 
 	if err := validate.Struct(&reqTodo); err != nil {
-		log.Errorf("We can validate for the creation of sql todo: %v", err)
+		log.Errorf("Validation failed: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Validation error",
 		})
@@ -117,34 +122,35 @@ func CreateSQLTodo(c *fiber.Ctx) error {
 		Completed: reqTodo.Completed,
 	}
 	if err := sqlrepository.CreateSQLTodo(&todo); err != nil {
-		log.Errorf("create repository error: %v", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Could not create todo",
-		})
+		log.Errorf("Failed to create todo in DB: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Database error"})
 	}
 
-	resp := schema.TodoSQLResponse{
+	resp := &schema.TodoSQLResponse{
 		ID:        todo.ID,
 		Title:     todo.Title,
 		Completed: todo.Completed,
-		CreatedAt: todo.CreatedAt.Format("1990-12-31"),
+		CreatedAt: todo.CreatedAt.Format("2006-01-02"),
 	}
-
+	log.Infof("Successfully created todo with ID %d", todo.ID)
 	return c.Status(fiber.StatusCreated).JSON(resp)
 }
 
 // @Summary     Update todo
-// @Description Update todo by ID
+// @Description Update an existing todo
 // @Tags        sql
 // @Accept      json
 // @Produce     json
 // @Param       id path int true "Todo ID"
-// @Param       todo body schema.TodoRequest true "Todo object"
+// @Param       todo body schema.TodoRequest true "Updated todo data"
 // @Success     200 {object} schema.TodoSQLResponse
-// @Failure		404	{string}	string	"Todo not found"
+// @Failure     404 {string} string "Todo not found"
+// @Failure     400 {string} string "Invalid ID"
+// @Failure     500 {string} string "Database error"
 // @Router      /sql/todos/{id} [put]
 func UpdateSQLTodo(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
+	//id, err := strconv.ParseUint(c.Params("id"), 10, 32)
+	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		log.Errorf("invalid id format to update a todo: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -154,7 +160,7 @@ func UpdateSQLTodo(c *fiber.Ctx) error {
 
 	todo, err := sqlrepository.GetSQLTodoByID(uint(id))
 	if err != nil {
-		log.Errorf("could not get todo to update a todo: %v", err)
+		log.Errorf("Todo with ID %d not found: %v", id, err)
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "Todo not found",
 		})
@@ -179,7 +185,7 @@ func UpdateSQLTodo(c *fiber.Ctx) error {
 	todo.Title = reqTodo.Title
 	todo.Completed = reqTodo.Completed
 	if err := sqlrepository.UpdateSQLTodo(todo); err != nil {
-		log.Errorf("could not update the todo in the db: %v", err)
+		log.Errorf("Failed to update todo with ID %d: %v", todo.ID, err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Could not update todo",
 		})
@@ -189,14 +195,15 @@ func UpdateSQLTodo(c *fiber.Ctx) error {
 		ID:        todo.ID,
 		Title:     todo.Title,
 		Completed: todo.Completed,
-		UpdatedAt: todo.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+		CreatedAt: todo.CreatedAt.Format("2006-01-02"),
+		UpdatedAt: todo.UpdatedAt.Format("2006-01-02"),
 	}
-
+	log.Infof("Successfully updated todo with ID %d", todo.ID)
 	return c.Status(fiber.StatusOK).JSON(response)
 }
 
 // @Summary     Delete todo
-// @Description Soft delete a todo by ID and return deletion details
+// @Description Soft delete a todo by ID
 // @Tags        sql
 // @Accept      json
 // @Produce     json
@@ -204,9 +211,11 @@ func UpdateSQLTodo(c *fiber.Ctx) error {
 // @Success     202 {object} schema.MessageSQLResponse
 // @Failure     404 {string} string "Todo not found"
 // @Failure     400 {string} string "Invalid ID"
+// @Failure     500 {string} string "Database error"
 // @Router      /sql/todos/{id} [delete]
 func DeleteSQLTodo(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
+	//id, err := strconv.ParseUint(c.Params("id"), 10, 32)
+	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		log.Errorf("Invalid ID for delete request: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

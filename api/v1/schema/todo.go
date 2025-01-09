@@ -1,8 +1,8 @@
 package schema
 
 type TodoRequest struct {
-	Title     string `json:"title" validate:"required,min=3"` //  example:"Sample Todo"
-	Completed bool   `json:"completed"`                       //example:"false"
+	Title     string `json:"title" validate:"required,min=3" example:"Sample Todo"` //  example:"Sample Todo"
+	Completed bool   `json:"completed" example:"false"`                             //example:"false"
 }
 
 /* type FindTodo struct {
@@ -30,11 +30,11 @@ type TodoSQLResponse struct {
 	ID        uint   `json:"id" example:"1"`
 	Title     string `json:"title" example:"Sample Todo"`
 	Completed bool   `json:"completed" example:"false"`
-	CreatedAt string `json:"created_at"` // example:"2023-01-01T00:00:00Z"
-	UpdatedAt string `json:"updated_at"` // example:"2023-01-01T00:00:00Z"
+	CreatedAt string `json:"created_at" example:"2023-01-01"` // Formatted date
+	UpdatedAt string `json:"updated_at" example:"2023-01-01"` // Formatted date
 }
 
 type MessageSQLResponse struct {
 	MessageResponse
-	DeletedAt string `json:"delete_at"`
+	DeletedAt string `json:"deleted_at" example:"2023-01-01"`
 }
