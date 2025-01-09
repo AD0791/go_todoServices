@@ -30,7 +30,12 @@ func GetSQLTodoByID(id uint) (*sqlmodel.Todo, error) {
 }
 
 func CreateSQLTodo(todo *sqlmodel.Todo) error {
-	return database.DB.Create(&todo).Error
+	if err := database.DB.Create(&todo).Error; err != nil {
+		log.Errorf("Failed to create todo: %v", err)
+		return err
+	}
+	log.Infof("Todo created with ID %d", todo.ID)
+	return nil
 }
 
 func UpdateSQLTodo(todo *sqlmodel.Todo) error {

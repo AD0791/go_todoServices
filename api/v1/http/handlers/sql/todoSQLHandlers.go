@@ -43,8 +43,8 @@ func GetSQLTodos(c *fiber.Ctx) error {
 			ID:        todo.ID,
 			Title:     todo.Title,
 			Completed: todo.Completed,
-			CreatedAt: todo.CreatedAt.Format("1990-12-01"),
-			UpdatedAt: todo.UpdatedAt.Format("1990-12-01"),
+			CreatedAt: todo.CreatedAt.Format("2006-01-02"),
+			UpdatedAt: todo.UpdatedAt.Format("2006-01-02"),
 		})
 	}
 	log.Infof("Successfully fetched %d todos", len(resp))
@@ -84,7 +84,6 @@ func GetSQLTodoByID(c *fiber.Ctx) error {
 		Title:     todo.Title,
 		Completed: todo.Completed,
 		CreatedAt: todo.CreatedAt.Format("2006-01-02"),
-		UpdatedAt: todo.UpdatedAt.Format("2006-01-02"),
 	}
 	log.Infof("Successfully fetched todo with ID %d", id)
 	return c.Status(fiber.StatusOK).JSON(resp)
@@ -101,7 +100,7 @@ func GetSQLTodoByID(c *fiber.Ctx) error {
 // @Failure     500 {string} string "Database error"
 // @Router      /sql/todos [post]
 func CreateSQLTodo(c *fiber.Ctx) error {
-	var reqTodo *schema.TodoRequest
+	var reqTodo schema.TodoRequest
 
 	if err := c.BodyParser(&reqTodo); err != nil {
 		log.Errorf("Failed to parse request body: %v", err)
@@ -238,7 +237,7 @@ func DeleteSQLTodo(c *fiber.Ctx) error {
 			ID:      int(deletedTodo.ID),
 			Message: "Todo was successfully deleted",
 		},
-		DeletedAt: deletedTodo.DeletedAt.Time.Format("1990-12-31"),
+		DeletedAt: deletedTodo.DeletedAt.Time.Format("2006-01-02"),
 	}
 
 	log.Infof("Todo with ID %d successfully soft-deleted at %s", id, response.DeletedAt)
