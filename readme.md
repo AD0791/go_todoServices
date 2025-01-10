@@ -26,3 +26,170 @@ follow this documentation: `swag init` and `swag`
 
 - [the declarative comment formats](https://github.com/swaggo/swag#declarative-comments-format)
 
+## notions
+
+
+In this project, we will implement JWT
+
+
+### basic authentication
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as User
+    participant F as Fiber (App)
+    participant DB as Database
+
+    Note over U: Enter username + password
+    U->>F: POST /login (username, password)
+    F->>DB: SELECT user by username
+    alt user not found
+        F->>U: 401 Unauthorized (User not found)
+    else user found
+        F->>F: Compare hashed password with provided password
+        alt password mismatch
+            F->>U: 401 Unauthorized (Invalid credentials)
+        else match
+            F->>F: Create session record (in store/memory)
+            F->>U: 200 OK + Session Cookie
+        end
+    end
+
+    Note over F: On subsequent requests<br>Use session ID to look up user
+
+```
+
+
+### JWT
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as User
+    participant F as Fiber (App)
+    participant DB as Database
+    participant S as JWT Signer
+
+    Note over U: Enter username + password
+    U->>F: POST /login (username, password)
+    F->>DB: Validate user credentials
+    alt invalid credentials
+        F->>U: 401 Unauthorized
+    else valid credentials
+        F->>S: Generate JWT (user claims, expiry)
+        S->>F: Return signed JWT
+        F->>U: 200 OK + JWT in response
+    end
+
+    Note over U: Store JWT (e.g., localStorage)
+
+    Note over U: On subsequent calls
+    U->>F: GET /protected <br> Authorization: Bearer JWT
+    F->>S: Verify JWT signature + check expiry
+    alt valid
+        F->>U: 200 OK (Protected Resource)
+    else invalid/expired
+        F->>U: 401 Unauthorized
+    end
+```
+
+
+### Oauth2
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as User
+    participant C as Client (Your App)
+    participant AS as Authorization Server
+    participant RS as Resource Server (User Data)
+
+    Note over U: Wants to login/authorize via external provider
+    U->>C: Click "Login with X"
+    C->>AS: GET /authorize?client_id=&redirect_uri=&state=xyz
+    AS->>U: Prompt login/consent
+    U->>AS: Login + consent to share resources
+    AS->>C: Redirect (302) with auth code + state=xyz
+    C->>AS: POST /token (auth code, client_secret, etc.)
+    AS->>C: 200 OK {access_token, refresh_token, ...}
+
+    Note over C: Access token is stored (server or client side)
+
+    C->>RS: GET /user (Authorization: Bearer access_token)
+    RS->>C: 200 OK { user info }
+```
+
+
+
+### MFA/OTP
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as User
+    participant F as Fiber (App)
+    participant DB as Database
+    participant T as TOTP Library
+
+    Note over U: Already has an account + password
+    U->>F: Request MFA Setup
+    F->>T: Generate TOTP secret + provisioning URI
+    T->>F: Return secret + QR code data
+    F->>DB: Store TOTP secret for user
+    F->>U: Show QR code (scanned by Authenticator app)
+
+    Note over U: Next login with password + TOTP code
+    U->>F: POST /mfa/verify (token)
+    F->>DB: Retrieve user's TOTP secret
+    F->>T: Validate code with stored secret
+    alt valid code
+        F->>U: 200 OK (MFA success)
+    else invalid code
+        F->>U: 401 Unauthorized
+    end
+
+```
+
+
+### ERD
+
+```mermaid
+erDiagram
+    USER {
+        bigint ID PK
+        string username
+        string password_hash
+        string totp_secret
+        bool enabled_2fa
+    }
+
+    SESSION {
+        bigint ID PK
+        bigint user_id FK
+        string session_data
+        datetime created_at
+        datetime expires_at
+    }
+
+    JWT_TOKEN {
+        bigint ID PK
+        bigint user_id FK
+        string token
+        datetime expires_at
+    }
+
+    OAUTH_TOKEN {
+        bigint ID PK
+        bigint user_id FK
+        string provider
+        string access_token
+        string refresh_token
+        datetime expires_at
+    }
+
+    USER ||--|{ SESSION : "has many"
+    USER ||--|{ JWT_TOKEN : "has many"
+    USER ||--|{ OAUTH_TOKEN : "can have many"
+
+```
