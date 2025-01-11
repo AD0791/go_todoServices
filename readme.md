@@ -193,3 +193,90 @@ erDiagram
     USER ||--|{ OAUTH_TOKEN : "can have many"
 
 ```
+
+## more notions
+
+
+Look at these structures
+
+### HTTP Request
+
+```mermaid
+flowchart TB
+    A[HTTP Request] --> B(Method)
+    A --> C(URI/Path)
+    A --> D(Protocol Version)
+    A --> E(Query Parameters)
+    A --> F(Headers)
+    A --> G(Body)
+
+    B --> B1[Example: GET, POST, PUT...]
+    C --> C1[Example: /api/v1/users]
+    D --> D1[Example: HTTP/1.1]
+    F --> F1[Content-Type, Accept, Host, etc]
+    G --> G1[Optional: JSON, Form Data, etc]
+
+```
+
+### HTTP response
+
+```mermaid
+flowchart TB
+    A[HTTP Response] --> B(Status Line)
+    A --> C(Protocol Version)
+    A --> D(Status Code)
+    A --> E(Status Message)
+    A --> F(Headers)
+    A --> G(Body)
+
+    C --> C1[Example: HTTP/1.1]
+    D --> D1[Example: 200, 404, 500]
+    E --> E1[Example: OK, Not Found, Internal Server Error]
+    F --> F1[Content-Type, Content-Length, etc]
+    G --> G1[JSON, HTML, etc]
+
+```
+
+### Session
+
+```mermaid
+flowchart TB
+    A((Session)) --> B[Session ID]
+    A --> C[User ID or user data reference]
+    A --> D[Created At]
+    A --> E[Expires At]
+    A --> F[Session Data key-value pairs]
+
+    B --> B1[Random or hashed token]
+    C --> C1[Link to user record in DB]
+    F --> F1[CSRF token, preferences, etc.]
+```
+
+### JWT
+
+```mermaid
+flowchart TB
+    A[JWT Token] --> B[Header JSON]
+    A --> C[Payload JSON]
+    A --> D[Signature]
+
+    B --> B1[alg: HS256, RS256, etc]
+    B --> B2[typ: JWT]
+    C --> C1[sub, iss, exp, iat, custom claims...]
+    D --> D1[HMAC or RSA signature over Header + Payload]
+```
+
+### TOTP
+
+```mermaid
+flowchart TB
+    A((TOTP Setup)) --> B[User ID]
+    A --> C[TOTP Secret]
+    A --> D[Issuer App name]
+    A --> E[Digits e.g., 6]
+    A --> F[Period e.g., 30s]
+
+    C --> C1[Shared secret stored securely]
+    F --> F1[Time window for each code]
+
+```
