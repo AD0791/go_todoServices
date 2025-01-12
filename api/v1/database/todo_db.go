@@ -32,13 +32,16 @@ func InitDatabase(cfg *config.Config) error {
 		return err
 	}
 
-	err = db.AutoMigrate(&sqlmodel.Todo{})
+	err = db.AutoMigrate(&sqlmodel.User{}, &sqlmodel.Todo{})
 	if err != nil {
 		log.Errorf("Failed to migrate the model(s) to the db: %v", err)
 		return err
 	}
 
+	nameInfo := db.Migrator().CurrentDatabase()
+
 	DB = db
 
+	log.Infof("The current db name: %s", nameInfo)
 	return nil
 }

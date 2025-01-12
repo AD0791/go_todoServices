@@ -12,6 +12,12 @@ definitions:
     required:
     - title
     type: object
+  schema.ErrorMessage:
+    properties:
+      error:
+        example: Invalid input
+        type: string
+    type: object
   schema.MessageResponse:
     properties:
       id:
@@ -74,6 +80,39 @@ definitions:
         description: Formatted date
         example: "2023-01-01"
         type: string
+    type: object
+  schema.UserRequest:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      full_name:
+        example: John Doe
+        minLength: 3
+        type: string
+      password:
+        example: password123
+        minLength: 8
+        type: string
+    required:
+    - email
+    - full_name
+    - password
+    type: object
+  schema.UserResponse:
+    properties:
+      created_at:
+        example: "2025-01-01"
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      full_name:
+        example: John Doe
+        type: string
+      id:
+        example: 1
+        type: integer
     type: object
 host: localhost:8080
 info:
@@ -484,6 +523,36 @@ paths:
       summary: Update todo
       tags:
       - sql
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user
+      parameters:
+      - description: User details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/schema.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/schema.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ErrorMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/schema.ErrorMessage'
+      summary: Create user
+      tags:
+      - users
 schemes:
 - http
 swagger: "2.0"
@@ -494,3 +563,5 @@ tags:
   name: service
 - description: SQL-based todo operations
   name: sql
+- description: User SQL operations
+  name: users

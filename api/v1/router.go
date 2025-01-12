@@ -20,4 +20,5 @@ func RegisterRoutes(app *fiber.App) {
 	filehandlers.RegisterFileTodoRoutes(api)
 	servicehandlers.RegisterServiceTodoRoutes(api)
 	sqlhandlers.RegisterSQLTodoRoutes(api)
+	sqlhandlers.RegisterUserRoutes(api)
 }
