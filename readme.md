@@ -4,6 +4,26 @@
 
 Get solid at Backend Engineering
 
+Install air and swag
+
+If you haven't already installed air and swag, you can do so using the go install command:
+
+Install air:
+
+```bash
+go install github.com/air-verse/air@latest
+```
+
+Install swag:
+
+```bash
+go install github.com/swaggo/swag/cmd/swag@latest
+```
+
+These commands will place the binaries in $GOPATH/bin.
+
+> giving your OS, fix your gopath. `go env` might help.
+
 Launch hmr server
 
 ```bash
